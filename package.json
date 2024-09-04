@@ -1,15 +1,20 @@
 {
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
     "events": "^3.3.0",
     "express": "^4.19.2",
+    "express-async-handler": "^1.2.0",
+    "express-validator": "^7.2.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.1",
     "nodemon": "^3.1.4"
   },
   "name": "dating-app-backend",
   "description": "",
   "version": "1.0.0",
-  "type": "commonjs",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
