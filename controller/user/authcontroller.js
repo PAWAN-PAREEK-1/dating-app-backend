@@ -84,3 +84,9 @@ export const login = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 }
+
+export const  protect = async(req, res) => {
+
+    res.status(200).json({ message: 'This is a protected route', user: req.user });
+
+}
