@@ -5,7 +5,9 @@ const UserSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     gender: { type: String, required: true },
-    dateOfBirth: { type: Date, required: true }
+    dateOfBirth: { type: Date, required: true },
+    profile:{type:mongoose.Schema.Types.ObjectId, ref:'profile'},
+    prefrences:{type:mongoose.Schema.Types.ObjectId, ref:'prefrences'},
 });
 
 const User = mongoose.model('User', UserSchema);
