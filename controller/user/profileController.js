@@ -4,7 +4,7 @@ import Profile from "../../models/profile.js"
 import User from "../../models/user.js"
 
 
-export const createProfile = async (req, res) => {
+export const createOrUpdateProfile = async (req, res) => {
     const userId = req.user.id;
     const { bio, profilePicture, city, country } = req.body;
 
