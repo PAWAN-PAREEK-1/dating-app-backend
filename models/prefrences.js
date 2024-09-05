@@ -4,7 +4,7 @@ const prefrencesSchema = new mongoose.Schema({
     genderPrefrences:{
         typeof: String,
         required: true,
-        enum: ['male', 'female',transgender]
+        enum: ['male', 'female',"transgender"]
     },
 
     minAge:{
@@ -16,7 +16,7 @@ const prefrencesSchema = new mongoose.Schema({
     },
     interests:{
             type:String,
-            default: [
+            enum: [
                 'Music',
                 'Movies & TV Shows',
                 'Travel',

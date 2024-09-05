@@ -7,38 +7,58 @@ import User from "../../models/user.js"
 export const createProfile = async (req, res) => {
     const userId = req.user.id;
     const { bio, profilePicture, city, country } = req.body;
-    console.log('User ID:', userId);
+
     try {
         const user = await User.findById(userId);
-        console.log('User ID:', userId);
-
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const profile = new Profile({
-            bio,
-            profilePicture,
-            city,
-            country,
-            user: user._id
-        });
+        // Check if a profile already exists for this user
+        let profile = await Profile.findOne({ user: userId });
 
-        await profile.save();
+        if (profile) {
+            // Update existing profile
+            profile.bio = bio || profile.bio;
+            profile.profilePicture = profilePicture || profile.profilePicture;
+            profile.city = city || profile.city;
+            profile.country = country || profile.country;
 
-        user.profile = profile._id;
-        await user.save();
+            await profile.save();
 
-        res.status(201).json({
-            message: 'Profile created successfully',
-            profile: profile
-        });
+            res.status(200).json({
+                message: 'Profile updated successfully',
+                profile: profile
+            });
+        } else {
+            // Create a new profile
+            profile = new Profile({
+                bio,
+                profilePicture,
+                city,
+                country,
+                user: user._id
+            });
+
+            await profile.save();
+
+            user.profile = profile._id;
+            await user.save();
+
+            res.status(201).json({
+                message: 'Profile created successfully',
+                profile: profile
+            });
+        }
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error in creating profile' });
+        res.status(500).json({ message: 'Error in creating or updating profile' });
     }
 };
+
+
+
 
 export const getFullProfile = async (req, res) => {
     const userId = req.user.id;
