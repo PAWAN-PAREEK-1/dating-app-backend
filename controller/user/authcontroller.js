@@ -11,7 +11,7 @@ export const registerUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { username, email, password, gender, dateOfBirth } = req.body;
+  const { username, email, password, gender, dateOfBirth ,name ,mobile} = req.body;
 
   try {
 
@@ -25,6 +25,8 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password,salt);
     console.log("user api authenticated")
     const user = new User({
+        name,
+        mobile,
         username:username,
         email:email,
         password:hashedPassword,
