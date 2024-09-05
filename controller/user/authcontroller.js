@@ -15,18 +15,18 @@ export const registerUser = async (req, res) => {
 
   try {
 
-    const findUser = await User.findOne({email})
-    if(findUser){
-        return res.status(200).json({message: "user already registered"})
-    }
+    // const findUser = await User.findOne({email})
+    // if(findUser){
+    //     return res.status(200).json({message: "user already registered"})
+    // }
 
 
     const salt= await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password,salt);
     console.log("user api authenticated")
     const user = new User({
-        name,
-        mobile,
+        name:name,
+        mobile:mobile,
         username:username,
         email:email,
         password:hashedPassword,
@@ -89,3 +89,4 @@ export const login = async (req, res) => {
 }
 
 
+   
