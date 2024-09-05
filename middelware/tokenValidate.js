@@ -1,38 +1,34 @@
-
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET
-
-export const authmiddleware = async (req, res, next) =>{
-
+export const authMiddleware = async (req, res, next) => {
     let token;
-    let authHeader = req.headers.Authorization || req.headers.authorization;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+
+    // Check if authorization header exists and starts with 'Bearer'
     if (authHeader && authHeader.startsWith('Bearer')) {
-        token = authHeader.split(' ')[1];
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                res.status(404).json({message:"you  are not authorized to create user"});
+        try {
+            // Extract the token
+            token = authHeader.split(' ')[1];
 
-            }
+            // Verify the token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-
+            // Attach user data from token to request object
             req.user = {
                 id: decoded.id,
-                email: decoded.email, // if needed, you can add other user properties
+                email: decoded.email, // add more properties if needed
             };
 
-            next();
-        });
-
-        if (!token) {
-            res.status(401);
-            throw new Error("user is not authorized");
+            next(); // pass the request to the next middleware or route handler
+        } catch (err) {
+            console.error('Token verification failed:', err);
+            res.status(401).json({ message: 'Not authorized, token failed' });
         }
-
-    }
-    else{
-        res.status(403).json({message:"token is required"})
+    } else {
+        res.status(403).json({ message: 'No token provided, authorization denied' });
     }
 
-
-}
+    if (!token) {
+        res.status(401).json({ message: 'User not authorized, no token' });
+    }
+};

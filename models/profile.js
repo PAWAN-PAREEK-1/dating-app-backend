@@ -2,12 +2,11 @@ import mongoose from "mongoose";
 
 const profileSchema = new mongoose.Schema({
 
-    bio:{type: string, require:true},
-    profilePicture:{type: string},
-    location:{
-        city:{type: string, require:true},
-        country:{type: string, require:true}
-    },
+    bio:{type: String, require:true},
+   
+        city:{type: String, require:true},
+        country:{type: String, require:true}
+    ,
     user:{type:mongoose.Schema.Types.ObjectId, ref:'User',required:true}
 
 

@@ -6,8 +6,8 @@ const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
     gender: { type: String, required: true },
     dateOfBirth: { type: Date, required: true },
-    profile:{type:mongoose.Schema.Types.ObjectId, ref:'profile'},
-    prefrences:{type:mongoose.Schema.Types.ObjectId, ref:'prefrences'},
+    profile:{type:mongoose.Schema.Types.ObjectId, ref:'Profile', default:null},
+    prefrences:{type:mongoose.Schema.Types.ObjectId, ref:'Prefrences'},
 });
 
 const User = mongoose.model('User', UserSchema);
