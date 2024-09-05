@@ -4,7 +4,7 @@ import Prefrences from "../../models/prefrences.js"
 
 export const createOrUpdatePreferences = async (req, res) => {
     const userId = req.user.id; // Getting the user ID from auth middleware
-    const { genderPreferences, minAge, maxAge, interests } = req.body;
+    const { genderPrefrences, minAge, maxAge, interests } = req.body;
 
     try {
         // Validate user ID
@@ -23,7 +23,7 @@ export const createOrUpdatePreferences = async (req, res) => {
 
         if (userPreferences) {
             // If preferences exist, update them
-            userPreferences.genderPrefrences = genderPreferences || userPreferences.genderPrefrences;
+            userPreferences.genderPrefrences = genderPrefrences || userPreferences.genderPrefrences;
             userPreferences.minAge = minAge || userPreferences.minAge;
             userPreferences.maxAge = maxAge || userPreferences.maxAge;
             userPreferences.interests = interests || userPreferences.interests;
@@ -37,7 +37,7 @@ export const createOrUpdatePreferences = async (req, res) => {
         } else {
             // If preferences don't exist, create new preferences
             userPreferences = new Prefrences({
-                genderPreferences,
+                genderPrefrences,
                 minAge,
                 maxAge,
                 interests,

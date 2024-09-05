@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const prefrencesSchema = new mongoose.Schema({
     genderPrefrences:{
-        typeof: String,
+        type: String,
         required: true,
         enum: ['male', 'female',"transgender"]
     },
