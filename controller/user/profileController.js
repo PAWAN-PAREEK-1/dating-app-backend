@@ -45,6 +45,8 @@ export const createOrUpdateProfile = async (req, res) => {
             user.profile = profile._id;
             await user.save();
 
+       
+
             res.status(201).json({
                 message: 'Profile created successfully',
                 profile: profile
