@@ -45,9 +45,10 @@ export const createOrUpdateProfile = async (req, res) => {
             user.profile = profile._id;
             await user.save();
 
-       
+
 
             res.status(201).json({
+                success:true,
                 message: 'Profile created successfully',
                 profile: profile
             });
@@ -55,7 +56,7 @@ export const createOrUpdateProfile = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error in creating or updating profile' });
+        res.status(500).json({success:false, message: 'Error in creating or updating profile' });
     }
 };
 
@@ -69,10 +70,10 @@ export const getFullProfile = async (req, res) => {
     try {
         const userData = await User.findById({_id:userId}).populate('profile').populate('prefrences').exec();
         if (!userData) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({success:false, message: "User not found" });
         }
 
-        res.status(200).json(userData);
+        res.status(200).json({success:true, userData});
 
     } catch (error) {
         console.error(error);

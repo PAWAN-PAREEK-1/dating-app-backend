@@ -51,6 +51,7 @@ export const createOrUpdatePreferences = async (req, res) => {
             await user.save();
 
             res.status(201).json({
+                success:true,
                 message: 'Preferences created successfully',
                 preferences: userPreferences
             });
@@ -58,7 +59,7 @@ export const createOrUpdatePreferences = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error creating or updating preferences', error: error.message });
+        res.status(500).json({ success:false,message: 'Error creating or updating preferences', error: error.message });
     }
 };
 
