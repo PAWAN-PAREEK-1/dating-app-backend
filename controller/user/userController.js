@@ -89,9 +89,13 @@ export const getAllUsers = async (req, res, next) => {
 
 export const getUsersByPreferences = async (req, res) => {
     const requestingUserId = req.user.id;
+    const removeDuplicates = (array, key) => {
+        return [...new Map(array.map(item => [item[key], item])).values()];
+    };
+
 
     try {
-        // 1. Fetch the requesting user's preferences
+
         const requestingUserPreferences = await Preferences.findOne({ user: requestingUserId });
         if (!requestingUserPreferences) {
             return res.status(404).json({ message: "Preferences not found for this user" });
@@ -99,38 +103,47 @@ export const getUsersByPreferences = async (req, res) => {
 
         const { genderPrefrences, minAge, maxAge } = requestingUserPreferences;
 
-        // 2. Calculate date range based on age preferences
-        const maxDateOfBirth = calculateAgeFromDOB(minAge); // Younger limit
-        const minDateOfBirth = calculateAgeFromDOB(maxAge); // Older limit
 
-        // 3. Use where clause to find users matching both gender and age range
-        const matchingUsers = await User.find()
-            .where('gender').equals(genderPrefrences)
-            .where('dateOfBirth').gte(minDateOfBirth).lte(maxDateOfBirth)
-            .populate('profile')
-            .exec();
+        const minDOB = calculateAgeFromDOB(maxAge);
+        const maxDOB = calculateAgeFromDOB(minAge);
 
-        if (matchingUsers.length === 0) {
-            return res.status(404).json({ message: "No users match the preferences" });
-        }
 
-        // 4. Format the results
-        const results = matchingUsers.map(user => ({
-            username: user.username,
-            bio: user.profile?.bio || 'No bio provided',
-            age: calculateAge(user.dateOfBirth),
-            country: user.profile?.country || 'No country provided',
-            gender: user.gender
-        }));
+        const preferredUsers = await User.where('gender').equals(genderPrefrences)
+            .where('dateOfBirth').gte(minDOB).lte(maxDOB)
+            .populate('profile').exec();
+
+        const preferredUserIds = preferredUsers.map(user => user._id);
+
+        const otherUsers = await User.where('_id').nin(preferredUserIds)
+            .populate('profile').exec();
+
+
+        const results = removeDuplicates([
+            ...preferredUsers.map(user => ({
+                username: user.username,
+                bio: user.profile?.bio || 'No bio provided',
+                age: calculateAge(user.dateOfBirth),
+                country: user.profile?.country || 'No country provided',
+                gender: user.gender,
+                match: true
+            })),
+            ...otherUsers.map(user => ({
+                username: user.username,
+                bio: user.profile?.bio || 'No bio provided',
+                age: calculateAge(user.dateOfBirth),
+                country: user.profile?.country || 'No country provided',
+                gender: user.gender,
+                match: false
+            }))
+        ], 'username');
 
         res.status(200).json(results);
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error retrieving matching users' });
+        res.status(500).json({ message: 'Error retrieving users' });
     }
 };
-
 
 
 
