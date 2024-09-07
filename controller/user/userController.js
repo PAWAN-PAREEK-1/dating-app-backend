@@ -5,7 +5,7 @@ import Profile from '../../models/profile.js';
 
 const calculateAge = (dateOfBirth) => {
     if (!dateOfBirth || isNaN(new Date(dateOfBirth).getTime())) {
-        return null; // Return null if the date is invalid
+        return null;
     }
 
     const today = new Date();
@@ -93,9 +93,11 @@ export const getUsersByPreferences = async (req, res) => {
         return [...new Map(array.map(item => [item[key], item])).values()];
     };
 
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
 
     try {
-
         const requestingUserPreferences = await Preferences.findOne({ user: requestingUserId });
         if (!requestingUserPreferences) {
             return res.status(404).json({ message: "Preferences not found for this user" });
@@ -103,20 +105,26 @@ export const getUsersByPreferences = async (req, res) => {
 
         const { genderPrefrences, minAge, maxAge } = requestingUserPreferences;
 
-
         const minDOB = calculateAgeFromDOB(maxAge);
         const maxDOB = calculateAgeFromDOB(minAge);
 
-
+      
         const preferredUsers = await User.where('gender').equals(genderPrefrences)
             .where('dateOfBirth').gte(minDOB).lte(maxDOB)
-            .populate('profile').exec();
+            .where('_id').ne(requestingUserId)
+            .populate('profile')
+            .skip(skip)
+            .limit(limit)
+            .exec();
 
         const preferredUserIds = preferredUsers.map(user => user._id);
 
         const otherUsers = await User.where('_id').nin(preferredUserIds)
-            .populate('profile').exec();
-
+            .where('_id').ne(requestingUserId)
+            .populate('profile')
+            .skip(skip)
+            .limit(limit)
+            .exec();
 
         const results = removeDuplicates([
             ...preferredUsers.map(user => ({
@@ -137,13 +145,19 @@ export const getUsersByPreferences = async (req, res) => {
             }))
         ], 'username');
 
-        res.status(200).json(results);
+        res.status(200).json({
+            page,
+            limit,
+            totalResults: results.length,
+            results
+        });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error retrieving users' });
     }
 };
+
 
 
 

@@ -15,7 +15,7 @@ const prefrencesSchema = new mongoose.Schema({
         type:Number,
     },
     interests:{
-            type:String,
+            type:[String],
             enum: [
                 'Music',
                 'Movies & TV Shows',
