@@ -3,6 +3,7 @@ import {auth} from './User/authRoutes.js';  // Ensure you have auth.js or the ap
 import {profileRoute} from './User/profileRoutes.js'
 import {preferences} from './User/prefrencesRoutes.js'
 import { usersData } from './User/allUserRoutes.js';
+import { friendRequest } from './User/friendRequestRouter.js';
 
 const router = express.Router();
 
@@ -11,6 +12,7 @@ router.use('/user/auth', auth);
 router.use('/user/profile', profileRoute);
 router.use('/user/prefrence', preferences);
 router.use('/user', usersData);
+router.use('/user/friend', friendRequest);
 
 
 // Export the router

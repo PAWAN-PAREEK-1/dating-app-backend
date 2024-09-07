@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
     dateOfBirth: { type: Date, required: true },
     profile:{type:mongoose.Schema.Types.ObjectId, ref:'Profile', default:null},
     prefrences:{type:mongoose.Schema.Types.ObjectId, ref:'Prefrences'},
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FriendRequest' }]
 });
 
 const User = mongoose.model('User', UserSchema);
