@@ -65,18 +65,24 @@ export const createOrUpdateProfile = async (req, res) => {
 
 export const getFullProfile = async (req, res) => {
     const userId = req.user.id;
-    console.log(userId)
 
     try {
-        const userData = await User.findById({_id:userId}).populate('profile').populate('prefrences').exec();
+      
+        const userData = await User.findById(userId)
+            .select('-password')
+            .populate('profile')
+            .populate('prefrences')
+            .exec();
+
         if (!userData) {
-            return res.status(404).json({success:false, message: "User not found" });
+            return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        res.status(200).json({success:true, userData});
+        res.status(200).json({ success: true, userData });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error in getting user data' });
     }
 };
+

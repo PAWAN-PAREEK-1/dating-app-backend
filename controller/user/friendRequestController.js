@@ -89,43 +89,85 @@ export const getAllFriendRequest = async (req, res) => {
 };
 
 export const changeRequestStatus = async (req, res) => {
-  const userId = req.user.id;
-  const {status,id:friendRequestId} = req.query;
+    const userId = req.user.id;
+    const { status, id: friendRequestId } = req.query;
 
-  try {
-    if (!["pending", "requested", "accepted"].includes(status)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid status" });
-    }
+    try {
+      if (!["pending", "requested", "accepted"].includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid status" });
+      }
 
-    const changeStatus = await FriendRequest.findOneAndUpdate(
-      { _id: friendRequestId, recipient: userId },
-      { $set: { status } }
-    );
+      // Find the friend request
+      const friendRequest = await FriendRequest.findOne({ _id: friendRequestId, recipient: userId });
 
-    if (changeStatus.nModified === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Friend request not found or not authorized to update",
+      if (!friendRequest) {
+        return res.status(404).json({ success: false, message: "Friend request not found or not authorized to update" });
+      }
+
+      // Update the status of the friend request
+      const updatedRequest = await FriendRequest.findOneAndUpdate(
+        { _id: friendRequestId, recipient: userId },
+        { $set: { status } },
+        { new: true }
+      );
+
+      if (status === 'accepted') {
+        // Add the recipient to the requester's friends list
+        await User.findByIdAndUpdate(friendRequest.requester, {
+          $addToSet: { friends: userId }
         });
-    }
 
-    res
-      .status(200)
-      .json({
+        // Add the requester to the recipient's friends list
+        await User.findByIdAndUpdate(friendRequest.recipient, {
+          $addToSet: { friends: friendRequest.requester }
+        });
+      }
+
+      res.status(200).json({
         success: true,
         message: "Friend request status updated successfully",
       });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
         success: false,
         message: "Error updating friend request status",
       });
-  }
-};
+    }
+  };
+
+  export const getUserFriends = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+      // Find the user and populate the 'friends' field
+      const user = await User.findById(userId).populate('friends', 'username');
+
+      // Check if the user has friends
+      if (!user || !user.friends) {
+        return res.status(404).json({
+          success: false,
+          message: "User or friends not found",
+        });
+      }
+
+      // Transform the friends array to exclude unnecessary fields
+      const friendsList = user.friends.map(friend => ({
+        _id: friend._id,
+        username: friend.username
+      }));
+
+      // Send the response with the transformed friends list
+      res.status(200).json({
+        success: true,
+        message: "All friends fetched successfully",
+        friends: friendsList
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching friends",
+      });
+    }
+  };
