@@ -97,14 +97,14 @@ export const changeRequestStatus = async (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid status" });
       }
 
-      // Find the friend request
+
       const friendRequest = await FriendRequest.findOne({ _id: friendRequestId, recipient: userId });
 
       if (!friendRequest) {
         return res.status(404).json({ success: false, message: "Friend request not found or not authorized to update" });
       }
 
-      // Update the status of the friend request
+      
       const updatedRequest = await FriendRequest.findOneAndUpdate(
         { _id: friendRequestId, recipient: userId },
         { $set: { status } },
@@ -140,7 +140,7 @@ export const changeRequestStatus = async (req, res) => {
     const userId = req.user.id;
 
     try {
-      // Find the user and populate the 'friends' field
+
       const user = await User.findById(userId).populate('friends', 'username');
 
       // Check if the user has friends
@@ -171,3 +171,56 @@ export const changeRequestStatus = async (req, res) => {
       });
     }
   };
+
+
+  export const blockOrUnblockUser = async (req, res) => {
+    const userId = req.user.id;
+    const { id: userToBlockId, status } = req.query;
+
+
+    if (status !== 'true' && status !== 'false') {
+        return res.status(400).json({ success: false, message: "Invalid status value. It should be either 'true' or 'false'." });
+    }
+
+    try {
+        if (status === 'true') {
+
+            if (userId === userToBlockId) {
+                return res.status(400).json({ success: false, message: "You cannot block yourself." });
+            }
+
+            const userToBlock = await User.findById(userToBlockId);
+            if (!userToBlock) {
+                return res.status(404).json({ success: false, message: "User to block not found." });
+            }
+
+
+            await User.findByIdAndUpdate(userId, {
+                $addToSet: { blockedUsers: userToBlockId }
+            });
+
+
+
+
+            res.status(200).json({ success: true, message: "User blocked successfully." });
+        } else {
+
+            if (userId === userToBlockId) {
+                return res.status(400).json({ success: false, message: "You cannot unblock yourself." });
+            }
+
+            await User.findByIdAndUpdate(userId, {
+                $pull: { blockedUsers: userToBlockId }
+            });
+
+
+
+            res.status(200).json({ success: true, message: "User unblocked successfully." });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Error processing request." });
+    }
+};
+
+
