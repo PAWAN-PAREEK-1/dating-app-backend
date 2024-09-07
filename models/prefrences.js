@@ -4,7 +4,7 @@ const prefrencesSchema = new mongoose.Schema({
     genderPrefrences:{
         type: String,
         required: true,
-        enum: ['male', 'female',"transgender"]
+        enum: ['Male', 'Female',"Transgender","Bi"]
     },
 
     minAge:{
