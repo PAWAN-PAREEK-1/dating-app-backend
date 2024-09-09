@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.io Chat Test</title>
+  <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Socket.io Chat Test</h1>
+
+  <input type="text" id="message" placeholder="Type a message">
+  <button id="send">Send</button>
+
+  <div id="chat"></div>
+
+  <script>
+    // Adjust server URL as necessary
+    const socket = io('http://localhost:8080');
+
+    // Example IDs - these should be dynamically set based on the actual user
+    const senderId = '66d99cb5b38c5f243c0ff716'; // Example ObjectId as a string
+    const recipientId = '66d9b7681dcb8c51a3471b94'; // Example ObjectId as a string
+
+    // Fetch previous chat messages when the page loads
+    window.onload = function() {
+      fetchMessages();
+    };
+
+    function fetchMessages() {
+      fetch(`http://localhost:8080/api/user/chat/?sender=${senderId}&recipient=${recipientId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(messages => {
+        const chatDiv = document.getElementById('chat');
+        chatDiv.innerHTML = ''; // Clear chat before appending new messages
+        if (messages && messages.length > 0) {
+          messages.forEach(message => {
+            const senderUsername = message.sender && message.sender.username ? message.sender.username : 'Unknown Sender';
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = `${senderUsername}: ${message.message}`;
+            chatDiv.appendChild(messageDiv);
+          });
+        } else {
+          chatDiv.innerHTML = "<p>No previous messages found.</p>";
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching messages:', error);
+      });
+    }
+
+    // Send a chat message
+    document.getElementById('send').addEventListener('click', () => {
+      const messageText = document.getElementById('message').value;
+      if (messageText) {
+        fetch('http://localhost:8080/api/user/chat/', {
+          method: 'POST',
+          headers: {
+            'Sender-ID': senderId,
+            'Recipient-ID': recipientId,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text: messageText })
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Message sent:', data);
+          document.getElementById('message').value = '';
+          fetchMessages(); // Refresh the chat after sending a message
+        })
+        .catch(error => {
+          console.error('Error sending message:', error);
+        });
+      }
+    });
+
+    // Handle incoming chat messages
+    socket.on('chatMessage', (message) => {
+      const chatDiv = document.getElementById('chat');
+      const senderUsername = message.sender && message.sender.username ? message.sender.username : 'Unknown Sender';
+      const messageDiv = document.createElement('div');
+      messageDiv.textContent = `${senderUsername}: ${message.message}`;
+      chatDiv.appendChild(messageDiv);
+    });
+
+    // Emit join room event if needed
+    socket.emit('joinRoom', senderId);
+  </script>
+</body>
+</html>

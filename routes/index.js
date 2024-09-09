@@ -4,6 +4,7 @@ import {profileRoute} from './User/profileRoutes.js'
 import {preferences} from './User/prefrencesRoutes.js'
 import { usersData } from './User/allUserRoutes.js';
 import { friendRequest } from './User/friendRequestRouter.js';
+import { chat } from './User/chatRoutes.js';
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.use('/user/profile', profileRoute);
 router.use('/user/prefrence', preferences);
 router.use('/user', usersData);
 router.use('/user/friend', friendRequest);
+router.use('/user/chat', chat);
 
 
 // Export the router
