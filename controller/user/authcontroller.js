@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator";
 import User from "../../models/user.js"; // Adjust the path to your User model
 import jwt from 'jsonwebtoken';
+import { genrateVerificationToken,sendVerficationEmail } from "./verificationController.js";
 
 
 export const registerUser = async (req, res) => {
@@ -38,9 +39,17 @@ export const registerUser = async (req, res) => {
 
     await user.save()
 
+
+
+    const verificationToken = genrateVerificationToken(user.id,user.email)
+
+
+
+    sendVerficationEmail(user,verificationToken)
+
     res.status(201).json({
         success:true,
-        message: 'User registered successfully',
+        message: 'User registered successfully. Please check your email to verify your account.',
         user: {
             id: user._id,
             username: user.username,
