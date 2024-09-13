@@ -16,10 +16,10 @@ const setupSocket = (server) => {
 
       // Handle user joining a chat room
       socket.on('joinRoom', (userId) => {
+        console.log(`Received joinRoom event with userId: ${userId}`);
         socket.join(userId);
         console.log(`User ${userId} joined the room`);
-      });
-
+    });
       // Handle chat messages
       socket.on('chatMessage', async (message) => {
         const { sender, recipient, text } = message;
@@ -36,6 +36,8 @@ const setupSocket = (server) => {
 
           io.to(recipient).emit('chatMessage', chatMessage);
           io.to(sender).emit('chatMessage', chatMessage);
+
+
         } catch (error) {
           console.error('Error saving or sending message:', error);
         }

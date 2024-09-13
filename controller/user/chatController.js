@@ -59,6 +59,12 @@ export const sendMessage = async (req, res) => {
       req.io.to(sender).emit('chatMessage', chatMessage);
 
 
+      // console.log(req.io.to(recipient).emit('chatMessage', chatMessage))
+      // console.log(req.io.to(sender).emit('chatMessage', chatMessage))
+
+      // console.log('Message emitted to recipient:', chatMessage);
+
+
       res.status(200).json(chatMessage);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -73,7 +79,7 @@ export const sendMessage = async (req, res) => {
 
         // Pagination parameters
         const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
-        const pageSize = parseInt(req.query.pageSize) || 20;  // Default to 20 messages per page
+        const pageSize = parseInt(req.query.pageSize) || 5000;  // Default to 20 messages per page
 
         const skip = (page - 1) * pageSize;
 
@@ -83,7 +89,7 @@ export const sendMessage = async (req, res) => {
                 { sender: sender, recipient: recipient },
                 { sender: recipient, recipient: sender }
             ])
-            .populate('sender', 'username name') 
+            .populate('sender', 'username name')
             .populate('recipient', 'username name')
             .sort({ createdAt: -1 })  // Newest messages first
             .skip(skip)
@@ -109,5 +115,23 @@ export const sendMessage = async (req, res) => {
         console.error('Error fetching messages:', error);
         res.status(500).json({ error: error.message });
     }
+};
+
+
+export const markMessagesAsRead = async (req, res) => {
+  try {
+    const { recipient } = req.query;
+    const sender = req.user.id;
+
+    // Mark messages as read for the recipient
+    await ChatMessage.updateMany(
+      { sender, recipient, read: false },
+      { $set: { read: true } }
+    );
+
+    res.status(200).json({ message: 'Messages marked as read.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
