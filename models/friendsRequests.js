@@ -16,6 +16,11 @@ const friendRequestSchema = new mongoose.Schema({
         required: true,
         enum: ['pending', 'requested', 'accepted']
     },
+    chatDeleteTime: {
+        type: Number,  
+        required: false,
+        default: 2/60
+      },
     createdAt: {
         type: Date,
         default: Date.now

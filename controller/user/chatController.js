@@ -27,12 +27,12 @@ export const sendMessage = async (req, res) => {
         });
 
         if (checkBlock) {
-          // If the sender has blocked the recipient
+
           if (String(checkBlock._id) === String(sender)) {
             return res.status(403).json({ message: `You have blocked ${recipient}. Unblock to send a message.` });
           }
 
-          // If the recipient has blocked the sender
+
           if (String(checkBlock._id) === String(recipient)) {
             return res.status(403).json({ message: `You are blocked by ${sender}.` });
           }
@@ -45,17 +45,28 @@ export const sendMessage = async (req, res) => {
           ]
       });
 
-      // If no friendship is found or the status is not accepted, return an error
+
       if (!friendship) {
           return res.status(403).json({ message: 'You are not friends with this user.' });
       }
 
 
+      const deleteAfterHours = friendship.chatDeleteTime
+
+      console.log("thisis deletet hours "+ deleteAfterHours)
+
+
+
+
+
+      const messageDeleteTime = deleteAfterHours ? new Date(Date.now() + deleteAfterHours * 60 * 60 * 1000) : null;
+
 
       const chatMessage = new ChatMessage({
         sender,
         recipient,
-        message: text
+        message: text,
+        messageDeleteTime
       });
 
       await chatMessage.save();
@@ -65,14 +76,12 @@ export const sendMessage = async (req, res) => {
       req.io.to(sender).emit('chatMessage', chatMessage);
 
 
-      // console.log(req.io.to(recipient).emit('chatMessage', chatMessage))
-      // console.log(req.io.to(sender).emit('chatMessage', chatMessage))
-
-      // console.log('Message emitted to recipient:', chatMessage);
+     
 
 
       res.status(200).json(chatMessage);
     } catch (error) {
+      console.log(error);
       res.status(500).json({ error: error.message });
     }
   };
@@ -191,7 +200,7 @@ export const sendMediaMessage = async (req, res) => {
 
     await chatMessage.save();
 
-    
+
     req.io.to(recipient).emit('chatMessage', chatMessage);
     req.io.to(sender).emit('chatMessage', chatMessage);
 
