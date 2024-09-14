@@ -2,7 +2,13 @@ import ChatMessage from '../../models/chatMessage.js';
 import FriendRequest from '../../models/friendsRequests.js';
 import User from '../../models/user.js';
 
-
+const getMediaType = (filename) => {
+  const ext = filename.split('.').pop();
+  if (['jpg', 'jpeg', 'png'].includes(ext)) return 'image';
+  if (['mp4', 'avi', 'mov'].includes(ext)) return 'video';
+  if (['pdf', 'doc', 'docx'].includes(ext)) return 'document';
+  return 'unknown';
+};
 
 
 export const sendMessage = async (req, res) => {
@@ -135,3 +141,62 @@ export const markMessagesAsRead = async (req, res) => {
   }
 };
 
+export const sendMediaMessage = async (req, res) => {
+  try {
+    const { recipient } = req.query;
+    const sender = req.user.id;
+    const files = req.files;
+
+
+    const checkBlock = await User.findOne({
+      $or: [
+        { _id: sender, blockedUsers: recipient },
+        { _id: recipient, blockedUsers: sender }
+      ]
+    });
+
+    if (checkBlock) {
+      if (String(checkBlock._id) === String(sender)) {
+        return res.status(403).json({ message: `You have blocked ${recipient}. Unblock to send a message.` });
+      }
+      if (String(checkBlock._id) === String(recipient)) {
+        return res.status(403).json({ message: `You are blocked by ${sender}.` });
+      }
+    }
+
+
+    const friendship = await FriendRequest.findOne({
+      $or: [
+        { requester: sender, recipient: recipient, status: 'accepted' },
+        { requester: recipient, recipient: sender, status: 'accepted' }
+      ]
+    });
+
+    if (!friendship) {
+      return res.status(403).json({ message: 'You are not friends with this user.' });
+    }
+
+
+    const media = files.map(file => ({
+      url: file.path,
+      type: getMediaType(file.originalname)
+    }));
+
+    const chatMessage = new ChatMessage({
+      sender,
+      recipient,
+      message: 'Media shared',
+      media: media
+    });
+
+    await chatMessage.save();
+
+    
+    req.io.to(recipient).emit('chatMessage', chatMessage);
+    req.io.to(sender).emit('chatMessage', chatMessage);
+
+    res.status(200).json(chatMessage);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

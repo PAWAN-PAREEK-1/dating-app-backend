@@ -1,13 +1,13 @@
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary from '../config/cloudinaryConfig.js'; 
+import cloudinary from '../config/cloudinaryConfig.js';
 
 const createUploadMiddleware = (folderName) => {
   const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
       folder: folderName,
-      allowed_formats: ['jpg', 'png', 'jpeg'],
+      allowed_formats: ['jpg', 'png', 'jpeg', 'mp4', 'pdf'],
       public_id: (req, file) => `${Date.now()}-${file.originalname}`,
     },
   });
@@ -17,7 +17,7 @@ const createUploadMiddleware = (folderName) => {
 
 
 const uploadProfile = createUploadMiddleware('profilePictures');
-const uploadChat = createUploadMiddleware('chatFiles');
+const uploadChatMedia = createUploadMiddleware('chatMedia');
 
 
-export { uploadProfile, uploadChat };
+export { uploadProfile, uploadChatMedia };

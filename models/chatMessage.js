@@ -13,6 +13,19 @@ const chatMessageSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  media: [
+    {
+      url: {
+        type: String,
+        required: true
+      },
+      type: {
+        type: String,
+        enum: ['image', 'video', 'document'],
+        required: true
+      }
+    }
+  ],
   message: {
     type: String,
     required: true
