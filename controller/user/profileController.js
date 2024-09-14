@@ -14,7 +14,7 @@ cloudinary.config({
   export const createOrUpdateProfile = async (req, res) => {
     const userId = req.user.id;
     const { bio, city, country } = req.body;
-    const profilePictures = req.files; // For multiple files
+    const profilePictures = req.files;
 
 
     try {
@@ -25,14 +25,8 @@ cloudinary.config({
 
       let profilePicturesUrls = [];
       if (profilePictures && profilePictures.length > 0) {
-        // Upload each picture to Cloudinary
-        for (const picture of profilePictures) {
-          const result = await cloudinary.uploader.upload(picture.path, {
-            resource_type: 'image',
-            folder: 'profilePicturess',
-          });
-          profilePicturesUrls.push(result.secure_url);
-        }
+
+        profilePicturesUrls = profilePictures.map(picture => picture.path);
       }
 
 
@@ -55,7 +49,7 @@ cloudinary.config({
 
         profile = new Profile({
           bio,
-          profilePictures: profilePicturesUrls, 
+          profilePictures: profilePicturesUrls,
           city,
           country,
           user: user._id
