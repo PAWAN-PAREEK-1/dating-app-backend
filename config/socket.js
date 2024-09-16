@@ -43,6 +43,12 @@ const setupSocket = (server) => {
         }
       });
 
+
+      socket.on('signal', (data) => {
+        const { signal, to } = data;
+        io.to(to).emit('signal', { signal, from: socket.id });
+    });
+
       socket.on('disconnect', () => {
         console.log('User disconnected');
       });
