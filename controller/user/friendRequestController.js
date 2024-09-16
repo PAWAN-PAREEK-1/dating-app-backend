@@ -236,3 +236,57 @@ export const changeRequestStatus = async (req, res) => {
 };
 
 
+export const deleteMesageForFriend = async(req,res) => {
+
+  try {
+    const userId  = req.user.id;
+    const friendId = req.params.id;
+    const {deleteTime} = req.body
+
+    if (!deleteTime && deleteTime !== 0) {
+      return res.status(400).json({ message: 'Please provide delete time in hours, or set to 0 to remove the time.' });
+    }
+    const checkFriend = await User.findOne({
+      _id:userId,
+      friends:friendId,
+    })
+
+    if(!checkFriend) {
+      return res.status(404).json({ message: 'Friend not found in your friends list.' });
+    }
+
+
+    const getSetDeleteTime = await FriendRequest.findOneAndUpdate(
+      {recipient:friendId,requester:userId},
+      {chatDeleteTime: deleteTime === 0 ? null : deleteTime},
+      {new:true}
+
+
+      )
+
+      const message = deleteTime === 0
+      ? `Delete time for friend ${friendId} has been removed.`
+      : `Delete time set to ${deleteTime} hours for friend ${friendId}.`;
+
+    res.status(200).json({
+      success: true,
+      message: message,
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(404).json({
+      sucess:false,
+      message:`issue in delete time set for ${friendId}`
+
+    })
+
+  }
+
+
+
+}
+
+

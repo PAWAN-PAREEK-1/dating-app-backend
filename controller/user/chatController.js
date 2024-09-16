@@ -76,7 +76,7 @@ export const sendMessage = async (req, res) => {
       req.io.to(sender).emit('chatMessage', chatMessage);
 
 
-     
+
 
 
       res.status(200).json(chatMessage);
@@ -100,6 +100,7 @@ export const sendMessage = async (req, res) => {
 
         // Fetch messages with pagination
         const messages = await ChatMessage.find()
+            .where('is_deleted').equals(false)
             .where('$or', [
                 { sender: sender, recipient: recipient },
                 { sender: recipient, recipient: sender }

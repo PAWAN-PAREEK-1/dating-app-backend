@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import connectDb from './config/connectDb.js';  // Default import
 import routes  from './routes/index.js';
-import "./cronjob/messageDeleteCron.js"
+// import "./cronjob/messageDeleteCron.js"
 
 import http from 'http';
 import {setupSocket} from './config/socket.js';
