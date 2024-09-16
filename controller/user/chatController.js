@@ -47,13 +47,24 @@ export const sendMessage = async (req, res) => {
 
 
       if (!friendship) {
-          return res.status(403).json({ message: 'You are not friends with this user.' });
+          const previousMessage = await ChatMessage.findOne({
+
+              $or:[
+                {sender: sender, recipient: recipient},
+                {sender: recipient, recipient: sender}
+              ]
+
+
+          })
+
+          if(previousMessage){
+            return res.status(403).json({ message: 'You are not friends with this user and cannot send more messages.' });
+          }
+
       }
 
 
-      const deleteAfterHours = friendship.chatDeleteTime
-
-      console.log("thisis deletet hours "+ deleteAfterHours)
+      const deleteAfterHours = friendship && friendship.chatDeleteTime ? friendship.chatDeleteTime : null;
 
 
 
