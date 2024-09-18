@@ -1,0 +1,20 @@
+[build]
+  # Directory to publish (e.g., build for React, dist for Vue or Nuxt)
+  publish = "build"
+  # Command to build your project
+  command = "npm run build"
+
+# Optional: Custom environment variables
+# [build.environment]
+#   NODE_ENV = "production"
+
+# Redirects and headers can also be defined here
+
+[[redirects]]
+  from = "/*"
+  to = "/server.html"
+  status = 200
+
+# Functions directory (for serverless functions)
+[build.functions]
+  directory = "netlify/functions"
