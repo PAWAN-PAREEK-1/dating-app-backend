@@ -44,9 +44,32 @@ const setupSocket = (server) => {
       });
 
 
-      socket.on('signal', (data) => {
+      socket.on('callRequest', ({ signal, to }) => {
+        console.log(`Call request from ${socket.id} to ${to}`);
+        io.to(to).emit('callRequest', { from: socket.id, signal });
+    });
+
+    socket.on('answer', ({ signal, to }) => {
+        console.log(`Answer received from ${socket.id} to ${to}`);
+        io.to(to).emit('answer', signal);
+    });
+
+    socket.on('endCall', ({ to }) => {
+        console.log(`Call ended by ${socket.id} for ${to}`);
+        io.to(to).emit('endCall');
+    });
+
+   
+    socket.on('signal', (data) => {
         const { signal, to } = data;
+        console.log(`Signal sent from ${socket.id} to ${to}`);
         io.to(to).emit('signal', { signal, from: socket.id });
+    });
+
+    socket.on('iceCandidate', ({ candidate, to }) => {
+      if (users[to]) {
+        users[to].emit('iceCandidate', { candidate, from: userId });
+      }
     });
 
       socket.on('disconnect', () => {
