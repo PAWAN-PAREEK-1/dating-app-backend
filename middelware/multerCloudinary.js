@@ -18,6 +18,7 @@ const createUploadMiddleware = (folderName) => {
 
 const uploadProfile = createUploadMiddleware('profilePictures');
 const uploadChatMedia = createUploadMiddleware('chatMedia');
+const uploadPostMedia = createUploadMiddleware('postMedia');
 
 
-export { uploadProfile, uploadChatMedia };
+export { uploadProfile, uploadChatMedia,uploadPostMedia };

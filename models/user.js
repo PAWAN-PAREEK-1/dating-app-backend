@@ -12,7 +12,8 @@ const UserSchema = new mongoose.Schema({
     prefrences:{type:mongoose.Schema.Types.ObjectId, ref:'Prefrences'},
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    isEmailVerified: { type: Boolean, default: false }
+    isEmailVerified: { type: Boolean, default: false },
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }]
 });
 
 const User = mongoose.model('User', UserSchema);
