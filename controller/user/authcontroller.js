@@ -4,6 +4,7 @@ import User from "../../models/user.js"; // Adjust the path to your User model
 import jwt from "jsonwebtoken";
 import {
   genrateVerificationToken,
+  sendForgotPasswordEmail,
   sendVerficationEmail,
 } from "./verificationController.js";
 
@@ -141,3 +142,70 @@ export const resetPassword = async (req, res) => {
       .json({ success: false, message: "issue in reseting password" });
   }
 };
+
+export const forgotPassword = async (req, res) => {
+
+    const {email }= req.body;
+
+    try {
+
+
+        const user = await User.findOne({email})
+
+        if(!user){
+            return res.status(404).json({ success:false , message: "you are nor registered"});
+        }
+
+
+
+    const verificationToken = genrateVerificationToken(user.id, user.email);
+
+    sendForgotPasswordEmail(user, verificationToken);
+
+
+    res.status(200).json({ success:true, message: "reset link send successfully" });
+
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(404).json({ success:true, message: "issue to send reset link" });
+    }
+};
+
+export const createNewPassword = async (req,res)=>{
+
+    const {token , newPassword} = req.body;
+    try {
+
+        const secret = process.env.JWT_SECRET;
+
+        const decode = jwt.verify(token,secret)
+
+        const {email}= decode;
+
+        console.log(email)
+
+        const user = await User.findOne({email})
+
+        if(!user){
+            return res.status(404).json({success:false , message :"User not registerd"})
+        }
+
+        const salt = await bcrypt.genSalt(10)
+
+        const hashedPassword = await bcrypt.hash(newPassword,salt)
+
+        user.password = hashedPassword
+
+        await user.save()
+
+        res.status(200).json({success:true, message:"passord changes succefully please login "})
+
+
+
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({success:true, message:"Error in changing password"})
+    }
+}

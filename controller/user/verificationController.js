@@ -34,6 +34,34 @@ export const sendVerficationEmail = (user, token) => {
   });
 };
 
+export const sendForgotPasswordEmail = (user, token) => {
+  const verifiacationLink = `http://localhost:8080/public/reset?token=${token}`;
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_ADDRESS, // Your Gmail address
+      pass: process.env.EMAIL_PASSWORD, // Your Gmail password (use an app password if 2FA is enabled)
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_ADDRESS, // Your Gmail address
+    to: user.email,
+    subject: "Reset Your Password",
+    text: `Click this link to change your password: ${verifiacationLink}`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending email:", error);
+    }
+  });
+};
+
+
 export const verifyEmail = async (req, res) => {
   const { token } = req.query;
 
@@ -67,3 +95,5 @@ export const verifyEmail = async (req, res) => {
     res.status(400).json({ message: "Invalid or expired token" });
   }
 };
+
+

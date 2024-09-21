@@ -51,8 +51,10 @@ export const userEmailAndMobileCheck = async (req, res, next) => {
         // Check if mobile already exists
         const checkMobile = await User.findOne({ mobile: mobile });
         if (checkMobile) {
-            return res.status(404).json({ message: "Mobile number already exists" });
+          return res.status(404).json({ message: "Mobile number already exists" });
         }
+
+        
 
         // If both checks pass, proceed to the next middleware or route handler
         next();
