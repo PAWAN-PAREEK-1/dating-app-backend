@@ -1,5 +1,12 @@
 import { Server } from 'socket.io';
 import ChatMessage from '../models/chatMessage.js';
+import { createClient } from 'redis';
+import { createAdapter } from '@socket.io/redis-adapter';
+
+
+
+
+
 
 let io;
 
@@ -10,6 +17,30 @@ const setupSocket = (server) => {
         methods: ["GET", "POST"]
       }
     });
+
+
+
+    const pubClient = createClient({
+      url: 'redis://:NGMEZgaRrf8tj6nLlTnlhVZsUk8iFHdG@redis-19391.c245.us-east-1-3.ec2.redns.redis-cloud.com:19391'
+  });
+
+  const subClient = pubClient.duplicate();
+
+  pubClient.connect().then(() => {
+      console.log('Redis pubClient connected');
+  }).catch((err) => {
+      console.error('Error connecting pubClient:', err);
+  });
+
+  subClient.connect().then(() => {
+      console.log('Redis subClient connected');
+      io.adapter(createAdapter(pubClient, subClient));
+  }).catch((err) => {
+      console.error('Error connecting subClient:', err);
+  });
+
+ 
+    io.adapter(createAdapter(pubClient, subClient));
 
     io.on('connection', (socket) => {
       console.log('A user connected');
@@ -59,7 +90,7 @@ const setupSocket = (server) => {
         io.to(to).emit('endCall');
     });
 
-   
+
     socket.on('signal', (data) => {
         const { signal, to } = data;
         console.log(`Signal sent from ${socket.id} to ${to}`);
